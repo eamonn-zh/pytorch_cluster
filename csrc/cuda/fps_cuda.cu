@@ -76,15 +76,15 @@ torch::Tensor fps_cuda(torch::Tensor src, torch::Tensor ptr, int64_t npoints, bo
   auto batch_size = ptr.numel() - 1;
 
   auto deg = ptr.narrow(0, 1, batch_size) - ptr.narrow(0, 0, batch_size);
-  // auto out_ptr = deg.toType(ratio.scalar_type()) * ratio;
 
   auto out_ptr = torch::full({batch_size}, npoints, ptr.options());
   out_ptr = out_ptr.cumsum(0);
+
   out_ptr = torch::cat({torch::zeros({1}, ptr.options()), out_ptr}, 0);
 
   torch::Tensor start;
   if (random_start) {
-    start = torch::rand(batch_size, src.options());
+    start = torch::rand(batch_size, torch::dtype(torch::kFloat32).device(src.device()));
     start = (start * deg.toType(start.scalar_type())).toType(torch::kLong);
   } else {
     start = torch::zeros({batch_size}, ptr.options());
