@@ -78,10 +78,8 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
 
   CHECK_INPUT(ptr_x.value().numel() == ptr_y.value().numel());
 
-  auto row =
-      torch::full(y.size(0) * num_neighbors, -1, ptr_y.value().options());
-  auto col =
-      torch::full(y.size(0) * num_neighbors, -1, ptr_y.value().options());
+  auto row = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
+  auto col = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
 
   dim3 BLOCKS((y.size(0) + THREADS - 1) / THREADS);
 
@@ -97,7 +95,5 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
             ptr_x.value().numel() - 1, num_neighbors, ignore_same_index);
       });
 
-  // auto mask = row != -1;
-  // return torch::stack({row.masked_select(mask), col.masked_select(mask)}, 0);
   return torch::stack({row, col}, 0);
 }
