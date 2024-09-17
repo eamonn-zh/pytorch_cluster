@@ -4,30 +4,26 @@ import os.path as osp
 import platform
 import sys
 from itertools import product
-
 import torch
 from setuptools import find_packages, setup
 from torch.__config__ import parallel_info
-from torch.utils.cpp_extension import (CUDA_HOME, BuildExtension, CppExtension,
-                                       CUDAExtension)
+from torch.utils.cpp_extension import (CUDA_HOME, BuildExtension, CUDAExtension)
 
 __version__ = '1.6.3'
-URL = 'https://github.com/rusty1s/pytorch_cluster'
+# URL = 'https://github.com/rusty1s/pytorch_cluster'
 
-WITH_CUDA = False
-if torch.cuda.is_available():
-    WITH_CUDA = CUDA_HOME is not None or torch.version.hip
+# WITH_CUDA = False
+#if torch.cuda.is_available():
+WITH_CUDA = CUDA_HOME is not None or torch.version.hip
 
-suffices = ['cpu', 'cuda'] if WITH_CUDA else ['cpu']
-if os.getenv('FORCE_CUDA', '0') == '1':
-    suffices = ['cuda', 'cpu']
-if os.getenv('FORCE_ONLY_CUDA', '0') == '1':
-    suffices = ['cuda']
-if os.getenv('FORCE_ONLY_CPU', '0') == '1':
-    suffices = ['cpu']
-
-BUILD_DOCS = os.getenv('BUILD_DOCS', '0') == '1'
-
+suffices = ['cuda']
+# suffices = ['cpu', 'cuda'] if WITH_CUDA else ['cpu']
+# if os.getenv('FORCE_CUDA', '0') == '1':
+#     suffices = ['cuda', 'cpu']
+# if os.getenv('FORCE_ONLY_CUDA', '0') == '1':
+#     suffices = ['cuda']
+# if os.getenv('FORCE_ONLY_CPU', '0') == '1':
+#     suffices = ['cpu']
 
 def get_extensions():
     extensions = []
@@ -85,15 +81,16 @@ def get_extensions():
         name = main.split(os.sep)[-1][:-4]
         sources = [main]
 
-        path = osp.join(extensions_dir, 'cpu', f'{name}_cpu.cpp')
-        if osp.exists(path):
-            sources += [path]
+        # path = osp.join(extensions_dir, 'cpu', f'{name}_cpu.cpp')
+        # if osp.exists(path):
+        #     sources += [path]
 
         path = osp.join(extensions_dir, 'cuda', f'{name}_cuda.cu')
         if suffix == 'cuda' and osp.exists(path):
             sources += [path]
 
-        Extension = CppExtension if suffix == 'cpu' else CUDAExtension
+        # Extension = CppExtension if suffix == 'cpu' else CUDAExtension
+        Extension = CUDAExtension
         extension = Extension(
             f'torch_cluster._{name}_{suffix}',
             sources,
@@ -125,28 +122,19 @@ if torch.cuda.is_available() and torch.version.hip:
 setup(
     name='torch_cluster',
     version=__version__,
-    description=('PyTorch Extension Library of Optimized Graph Cluster '
-                 'Algorithms'),
+    description=('PyTorch Extension Library of Optimized Graph Cluster Algorithms'),
     author='Matthias Fey',
     author_email='matthias.fey@tu-dortmund.de',
-    url=URL,
-    download_url=f'{URL}/archive/{__version__}.tar.gz',
-    keywords=[
-        'pytorch',
-        'geometric-deep-learning',
-        'graph-neural-networks',
-        'cluster-algorithms',
-    ],
+    # url=URL,
+    # download_url=f'{URL}/archive/{__version__}.tar.gz',
+    keywords=['pytorch'],
     python_requires='>=3.8',
     install_requires=install_requires,
     extras_require={
         'test': test_requires,
     },
-    ext_modules=get_extensions() if not BUILD_DOCS else [],
-    cmdclass={
-        'build_ext':
-        BuildExtension.with_options(no_python_abi_suffix=True, use_ninja=False)
-    },
+    ext_modules=get_extensions(),
+    cmdclass={'build_ext': BuildExtension.with_options(no_python_abi_suffix=True, use_ninja=False)},
     packages=find_packages(),
     include_package_data=include_package_data,
 )

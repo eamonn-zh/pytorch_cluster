@@ -12,9 +12,10 @@ else:
     grad_dtypes = [torch.half, torch.float, torch.double]
 floating_dtypes = grad_dtypes + [torch.bfloat16]
 
-devices = [torch.device('cpu')]
-if torch.cuda.is_available():
-    devices += [torch.device('cuda:0')]
+# devices = [torch.device('cpu')]
+# if torch.cuda.is_available():
+#     devices += [torch.device('cuda:0')]
+devices = [torch.device('cuda:0')]
 
 
 def tensor(x: Any, dtype: torch.dtype, device: torch.device):

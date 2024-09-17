@@ -5,15 +5,12 @@ import torch
 
 __version__ = '1.6.3'
 
-for library in [
-        '_version', '_grid', '_graclus', '_fps', '_rw', '_sampler', '_nearest',
-        '_knn', '_radius'
-]:
-    cuda_spec = importlib.machinery.PathFinder().find_spec(
-        f'{library}_cuda', [osp.dirname(__file__)])
-    cpu_spec = importlib.machinery.PathFinder().find_spec(
-        f'{library}_cpu', [osp.dirname(__file__)])
-    spec = cuda_spec or cpu_spec
+for library in ['_version', '_fps', '_radius']:
+    cuda_spec = importlib.machinery.PathFinder().find_spec(f'{library}_cuda', [osp.dirname(__file__)])
+    # cpu_spec = importlib.machinery.PathFinder().find_spec(
+    #     f'{library}_cpu', [osp.dirname(__file__)])
+    # spec = cuda_spec or cpu_spec
+    spec = cuda_spec
     if spec is not None:
         torch.ops.load_library(spec.origin)
     else:  # pragma: no cover
@@ -37,24 +34,10 @@ if torch.version.cuda is not None and cuda_version != -1:  # pragma: no cover
             f'matches your PyTorch install.')
 
 from .fps import fps  # noqa
-from .graclus import graclus_cluster  # noqa
-from .grid import grid_cluster  # noqa
-from .knn import knn, knn_graph  # noqa
-from .nearest import nearest  # noqa
-from .radius import radius, radius_graph  # noqa
-from .rw import random_walk  # noqa
-from .sampler import neighbor_sampler  # noqa
+from .radius import radius  # noqa
 
 __all__ = [
-    'graclus_cluster',
-    'grid_cluster',
     'fps',
-    'nearest',
-    'knn',
-    'knn_graph',
     'radius',
-    'radius_graph',
-    'random_walk',
-    'neighbor_sampler',
     '__version__',
 ]

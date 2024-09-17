@@ -64,12 +64,10 @@ __global__ void fps_kernel(const scalar_t *src, const int64_t *ptr,
   }
 }
 
-torch::Tensor fps_cuda(torch::Tensor src, torch::Tensor ptr,
-                       torch::Tensor ratio, bool random_start) {
+torch::Tensor fps_cuda(torch::Tensor src, torch::Tensor ptr, int64_t npoints, bool random_start) {
 
   CHECK_CUDA(src);
   CHECK_CUDA(ptr);
-  CHECK_CUDA(ratio);
   CHECK_INPUT(ptr.dim() == 1);
   c10::cuda::MaybeSetDevice(src.get_device());
 
@@ -78,14 +76,16 @@ torch::Tensor fps_cuda(torch::Tensor src, torch::Tensor ptr,
   auto batch_size = ptr.numel() - 1;
 
   auto deg = ptr.narrow(0, 1, batch_size) - ptr.narrow(0, 0, batch_size);
-  auto out_ptr = deg.toType(ratio.scalar_type()) * ratio;
-  out_ptr = out_ptr.ceil().toType(torch::kLong).cumsum(0);
+  // auto out_ptr = deg.toType(ratio.scalar_type()) * ratio;
+
+  auto out_ptr = torch::full({batch_size}, npoints, ptr.options());
+  out_ptr = out_ptr.cumsum(0);
   out_ptr = torch::cat({torch::zeros({1}, ptr.options()), out_ptr}, 0);
 
   torch::Tensor start;
   if (random_start) {
     start = torch::rand(batch_size, src.options());
-    start = (start * deg.toType(ratio.scalar_type())).toType(torch::kLong);
+    start = (start * deg.toType(start.scalar_type())).toType(torch::kLong);
   } else {
     start = torch::zeros({batch_size}, ptr.options());
   }
@@ -93,8 +93,7 @@ torch::Tensor fps_cuda(torch::Tensor src, torch::Tensor ptr,
   auto dist = torch::full(src.size(0), 5e4, src.options());
 
   auto out_size = (int64_t *)malloc(sizeof(int64_t));
-  cudaMemcpy(out_size, out_ptr[-1].data_ptr<int64_t>(), sizeof(int64_t),
-             cudaMemcpyDeviceToHost);
+  cudaMemcpy(out_size, out_ptr[-1].data_ptr<int64_t>(), sizeof(int64_t), cudaMemcpyDeviceToHost);
   auto out = torch::empty({out_size[0]}, out_ptr.options());
 
   auto stream = at::cuda::getCurrentCUDAStream();

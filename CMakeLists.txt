@@ -20,7 +20,7 @@ endif()
 find_package(Torch REQUIRED)
 
 file(GLOB HEADERS csrc/*.h)
-file(GLOB OPERATOR_SOURCES csrc/*.* csrc/cpu/*.*)
+file(GLOB OPERATOR_SOURCES csrc/*.*)
 if(WITH_CUDA)
   file(GLOB OPERATOR_SOURCES ${OPERATOR_SOURCES} csrc/cuda/*.h csrc/cuda/*.cu)
 endif()
@@ -63,26 +63,14 @@ install(EXPORT TorchClusterTargets
   DESTINATION ${TORCHCLUSTER_CMAKECONFIG_INSTALL_DIR})
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
-install(FILES
-  csrc/cpu/fps_cpu.h
-  csrc/cpu/graclus_cpu.h
-  csrc/cpu/grid_cpu.h
-  csrc/cpu/rw_cpu.h
-  csrc/cpu/sampler_cpu.h
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/cpu)
+
 if(WITH_CUDA)
   install(FILES
     csrc/cuda/fps_cuda.h
-    csrc/cuda/graclus_cuda.h
-    csrc/cuda/grid_cuda.h
-    csrc/cuda/knn_cuda.h
-    csrc/cuda/nearest_cuda.h
     csrc/cuda/radius_cuda.h
-    csrc/cuda/rw_cuda.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/cuda)
 endif()
 
 if(WITH_CUDA)
   set_property(TARGET torch_cuda PROPERTY INTERFACE_COMPILE_OPTIONS "")
-  set_property(TARGET torch_cpu PROPERTY INTERFACE_COMPILE_OPTIONS "")
 endif()
