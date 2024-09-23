@@ -12,8 +12,6 @@ from torch.utils.cpp_extension import (CUDA_HOME, BuildExtension, CUDAExtension)
 __version__ = '1.6.3'
 # URL = 'https://github.com/rusty1s/pytorch_cluster'
 
-# WITH_CUDA = False
-#if torch.cuda.is_available():
 WITH_CUDA = CUDA_HOME is not None or torch.version.hip
 
 suffices = ['cuda']
@@ -56,12 +54,6 @@ def get_extensions():
         else:
             print('Compiling without OpenMP...')
 
-        # Compile for mac arm64
-        if sys.platform == 'darwin':
-            extra_compile_args['cxx'] += ['-D_LIBCPP_DISABLE_AVAILABILITY']
-            if platform.machine == 'arm64':
-                extra_compile_args['cxx'] += ['-arch', 'arm64']
-                extra_link_args += ['-arch', 'arm64']
 
         if suffix == 'cuda':
             define_macros += [('WITH_CUDA', None)]
@@ -92,7 +84,7 @@ def get_extensions():
         # Extension = CppExtension if suffix == 'cpu' else CUDAExtension
         Extension = CUDAExtension
         extension = Extension(
-            f'torch_cluster._{name}_{suffix}',
+            f'torch_cluster_ext._{name}_{suffix}',
             sources,
             include_dirs=[extensions_dir],
             define_macros=define_macros,
@@ -120,7 +112,7 @@ if torch.cuda.is_available() and torch.version.hip:
     include_package_data = False
 
 setup(
-    name='torch_cluster',
+    name='torch_cluster_ext',
     version=__version__,
     description=('PyTorch Extension Library of Optimized Graph Cluster Algorithms'),
     author='Matthias Fey',

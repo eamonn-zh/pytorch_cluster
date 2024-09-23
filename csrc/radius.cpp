@@ -24,4 +24,4 @@ CLUSTER_API torch::Tensor radius(torch::Tensor x, torch::Tensor y,
     return radius_cuda(x, y, ptr_x, ptr_y, r, num_neighbors, ignore_same_index);
 }
 
-static auto registry = torch::RegisterOperators().op("torch_cluster::radius", &radius);
+static auto registry = torch::RegisterOperators().op("torch_cluster_ext::radius", &radius);

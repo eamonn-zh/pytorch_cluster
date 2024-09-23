@@ -67,8 +67,7 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
     CHECK_CUDA(ptr_x.value());
     CHECK_INPUT(ptr_x.value().dim() == 1);
   } else
-    ptr_x = torch::arange(0, x.size(0) + 1, x.size(0),
-                          x.options().dtype(torch::kLong));
+    ptr_x = torch::arange(0, x.size(0) + 1, x.size(0), x.options().dtype(torch::kLong));
 
   if (ptr_y.has_value()) {
     CHECK_CUDA(ptr_y.value());

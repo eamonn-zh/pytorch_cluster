@@ -21,4 +21,4 @@ CLUSTER_API torch::Tensor fps(torch::Tensor src, torch::Tensor ptr, int64_t npoi
     return fps_cuda(src, ptr, npoints, random_start);
 }
 
-static auto registry = torch::RegisterOperators().op("torch_cluster::fps", &fps);
+static auto registry = torch::RegisterOperators().op("torch_cluster_ext::fps", &fps);

@@ -1,4 +1,3 @@
-from typing import Optional
 import torch
 from torch import Tensor
 
@@ -33,5 +32,5 @@ def fps(  # noqa
 
     """
 
-    return torch.ops.torch_cluster.fps(src, ptr, npoints, random_start)
+    return torch.ops.torch_cluster_ext.fps(src, ptr, npoints, random_start)
 

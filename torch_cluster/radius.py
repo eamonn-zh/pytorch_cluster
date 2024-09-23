@@ -68,4 +68,4 @@ def radius(
         ptr_x = torch.bucketize(arange, batch_x)
         ptr_y = torch.bucketize(arange, batch_y)
 
-    return torch.ops.torch_cluster.radius(x, y, ptr_x, ptr_y, r, num_neighbors, ignore_same_index)
+    return torch.ops.torch_cluster_ext.radius(x, y, ptr_x, ptr_y, r, num_neighbors, ignore_same_index)
