@@ -2,8 +2,9 @@
 
 #include "../extensions.h"
 
-torch::Tensor radius_cuda(torch::Tensor x, torch::Tensor y,
-                          torch::optional<torch::Tensor> ptr_x,
-                          torch::optional<torch::Tensor> ptr_y, double r,
-                          int64_t num_neighbors,
-                          bool ignore_same_index);
+void radius_cuda(torch::Tensor x, torch::Tensor y,
+                 torch::optional<torch::Tensor> ptr_x,
+                 torch::optional<torch::Tensor> ptr_y, torch::Tensor row, torch::Tensor col, torch::Tensor mask,
+                 double r,
+                 int64_t num_neighbors,
+                 bool ignore_same_index);

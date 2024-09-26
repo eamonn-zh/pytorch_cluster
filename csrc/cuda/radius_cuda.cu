@@ -49,7 +49,7 @@ radius_kernel(const scalar_t *__restrict__ x, const scalar_t *__restrict__ y,
   }
 }
 
-torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y, torch::optional<torch::Tensor> ptr_x,
+void radius_cuda(const torch::Tensor x, const torch::Tensor y, torch::optional<torch::Tensor> ptr_x,
                           torch::optional<torch::Tensor> ptr_y, torch::Tensor row, torch::Tensor col, torch::Tensor mask,
                           const double r,
                           const int64_t num_neighbors,
@@ -94,5 +94,6 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y, torch::o
             ptr_y.value().data_ptr<int64_t>(), row.data_ptr<int64_t>(),
             col.data_ptr<int64_t>(), mask.data_ptr<>(bool), r * r, x.size(0), y.size(0), x.size(1),
             ptr_x.value().numel() - 1, num_neighbors, ignore_same_index);
-      });
+      }
+  );
 }
