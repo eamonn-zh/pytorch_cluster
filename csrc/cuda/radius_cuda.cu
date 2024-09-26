@@ -92,7 +92,7 @@ void radius_cuda(const torch::Tensor x, const torch::Tensor y, torch::optional<t
             x.data_ptr<scalar_t>(), y.data_ptr<scalar_t>(),
             ptr_x.value().data_ptr<int64_t>(),
             ptr_y.value().data_ptr<int64_t>(), row.data_ptr<int64_t>(),
-            col.data_ptr<int64_t>(), mask.data_ptr<>(bool), r * r, x.size(0), y.size(0), x.size(1),
+            col.data_ptr<int64_t>(), mask.data_ptr<bool>(), r * r, x.size(0), y.size(0), x.size(1),
             ptr_x.value().numel() - 1, num_neighbors, ignore_same_index);
       }
   );

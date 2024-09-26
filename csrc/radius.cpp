@@ -19,9 +19,10 @@ PyMODINIT_FUNC PyInit__radius_cuda(void) { return NULL; }
 
 CLUSTER_API void radius(torch::Tensor x, torch::Tensor y,
                      torch::optional<torch::Tensor> ptr_x,
-                     torch::optional<torch::Tensor> ptr_y, double r, int64_t num_neighbors,
+                     torch::optional<torch::Tensor> ptr_y, torch::Tensor row, torch::Tensor col, torch::Tensor mask,
+                     double r, int64_t num_neighbors,
                      bool ignore_same_index) {
-    radius_cuda(x, y, ptr_x, ptr_y, r, num_neighbors, ignore_same_index);
+    radius_cuda(x, y, ptr_x, ptr_y, row, col, mask, r, num_neighbors, ignore_same_index);
 }
 
 static auto registry = torch::RegisterOperators().op("torch_cluster_ext::radius", &radius);
