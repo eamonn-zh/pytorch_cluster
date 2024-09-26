@@ -4,14 +4,14 @@
 
 #include "utils.cuh"
 
-#define THREADS 256
+#define THREADS 512
 
 template <typename scalar_t>
 __global__ void
 radius_kernel(const scalar_t *__restrict__ x, const scalar_t *__restrict__ y,
               const int64_t *__restrict__ ptr_x,
               const int64_t *__restrict__ ptr_y, int64_t *__restrict__ row,
-              int64_t *__restrict__ col, const scalar_t r, const int64_t n,
+              int64_t *__restrict__ col, bool *__restrict__ mask, const scalar_t r, const int64_t n,
               const int64_t m, const int64_t dim, const int64_t num_examples,
               const int64_t num_neighbors,
               const bool ignore_same_index) {
@@ -32,6 +32,7 @@ radius_kernel(const scalar_t *__restrict__ x, const scalar_t *__restrict__ y,
     if (dist < r && !(ignore_same_index && n_y == n_x)) {
       row[n_y * num_neighbors + count] = n_y;
       col[n_y * num_neighbors + count] = n_x;
+      mask[n_y * num_neighbors + count] = true;
       count++;
     }
 
@@ -48,9 +49,9 @@ radius_kernel(const scalar_t *__restrict__ x, const scalar_t *__restrict__ y,
   }
 }
 
-torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
-                          torch::optional<torch::Tensor> ptr_x,
-                          torch::optional<torch::Tensor> ptr_y, const double r,
+torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y, torch::optional<torch::Tensor> ptr_x,
+                          torch::optional<torch::Tensor> ptr_y, torch::Tensor row, torch::Tensor col, torch::Tensor mask,
+                          const double r,
                           const int64_t num_neighbors,
                           const bool ignore_same_index) {
   CHECK_CUDA(x);
@@ -77,8 +78,9 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
 
   CHECK_INPUT(ptr_x.value().numel() == ptr_y.value().numel());
 
-  auto row = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
-  auto col = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
+//   auto row = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
+//   auto col = torch::empty(y.size(0) * num_neighbors, ptr_y.value().options());
+//   auto mask = torch::zeros(y.size(0) * num_neighbors, ptr_y.value().options().dtype(torch::kBool));
 
   dim3 BLOCKS((y.size(0) + THREADS - 1) / THREADS);
 
@@ -90,9 +92,7 @@ torch::Tensor radius_cuda(const torch::Tensor x, const torch::Tensor y,
             x.data_ptr<scalar_t>(), y.data_ptr<scalar_t>(),
             ptr_x.value().data_ptr<int64_t>(),
             ptr_y.value().data_ptr<int64_t>(), row.data_ptr<int64_t>(),
-            col.data_ptr<int64_t>(), r * r, x.size(0), y.size(0), x.size(1),
+            col.data_ptr<int64_t>(), mask.data_ptr<>(bool), r * r, x.size(0), y.size(0), x.size(1),
             ptr_x.value().numel() - 1, num_neighbors, ignore_same_index);
       });
-
-  return torch::stack({row, col}, 0);
 }
